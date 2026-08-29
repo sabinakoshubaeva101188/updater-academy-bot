@@ -13,11 +13,8 @@ if not TOKEN:
 
 API_URL = f"https://api.telegram.org/bot{TOKEN}"
 
-# Доступ к курсу в секундах: 30 дней
 ACCESS_TIME = 30 * 24 * 60 * 60
 
-# Пока используем память сервера.
-# Позже подключим базу данных, чтобы покупки не терялись после перезапуска.
 users = {}
 
 
@@ -36,39 +33,31 @@ def send_message(chat_id, text, keyboard=None):
         timeout=30
     )
 
+
 def get_updates(offset=None):
     params = {
         "timeout": 30,
     }
 
-    ...
+    if offset is not None:
+        params["offset"] = offset
 
     try:
-        ...
+        print("CALLING TELEGRAM GETUPDATES", flush=True)
+
+        response = requests.get(
+            f"{API_URL}/getUpdates",
+            params=params,
+            timeout=35
+        )
+
+        print("Telegram status:", response.status_code, flush=True)
+        print("Telegram response:", response.text, flush=True)
+
+        return response.json()
 
     except Exception as error:
-        ...
-        
-
-def has_access(chat_id):
-    user = users.get(chat_id)
-
-   try:
-    print("CALLING TELEGRAM GETUPDATES", flush=True)
-
-    response = requests.get(
-        f"{API_URL}/getUpdates",
-        params=params,
-        timeout=35
-    )
-
-    print("Telegram status:", response.status_code, flush=True)
-    print("Telegram response:", response.text, flush=True)
-
-    return response.json()
-
-    except Exception as error:
-        print("GET UPDATES ERROR:", error)
+        print("GET UPDATES ERROR:", error, flush=True)
         return {"ok": False}
 
 
@@ -108,6 +97,7 @@ def course_menu():
 
 def bot_loop():
     print("BOT LOOP STARTED", flush=True)
+
     offset = None
 
     while True:
@@ -115,6 +105,7 @@ def bot_loop():
             result = get_updates(offset)
 
             if not result.get("ok"):
+                print("Telegram API returned an error:", result, flush=True)
                 time.sleep(2)
                 continue
 
@@ -129,9 +120,7 @@ def bot_loop():
                 chat_id = message["chat"]["id"]
                 text = message.get("text", "")
 
-                # START
                 if text == "/start":
-
                     send_message(
                         chat_id,
                         "🎓 Updater Academy\n\n"
@@ -140,9 +129,7 @@ def bot_loop():
                         main_menu()
                     )
 
-                # КУРС
                 elif text == "📚 Курс":
-
                     if has_access(chat_id):
                         send_message(
                             chat_id,
@@ -160,9 +147,7 @@ def bot_loop():
                             main_menu()
                         )
 
-                # МАТЕРИАЛЫ
                 elif text == "📖 Материалы":
-
                     if has_access(chat_id):
                         send_message(
                             chat_id,
@@ -178,9 +163,7 @@ def bot_loop():
                             main_menu()
                         )
 
-                # ИНСТРУМЕНТЫ
                 elif text == "🛠 Инструменты":
-
                     if has_access(chat_id):
                         send_message(
                             chat_id,
@@ -194,9 +177,7 @@ def bot_loop():
                             main_menu()
                         )
 
-                # ПОКУПКА
                 elif text == "💳 Купить курс":
-
                     send_message(
                         chat_id,
                         "💳 Покупка курса\n\n"
@@ -208,12 +189,10 @@ def bot_loop():
                         "⚠️ Система оплаты подключим следующим этапом."
                     )
 
-                # СРОК ДОСТУПА
                 elif text == "📅 Мой доступ":
-
                     if has_access(chat_id):
-
                         expires_at = users[chat_id]["expires_at"]
+
                         remaining = int(
                             (expires_at - time.time()) / 86400
                         )
@@ -226,9 +205,7 @@ def bot_loop():
                             f"🔐 Ваш доступ активен.\n\n"
                             f"Осталось примерно: {remaining} дней."
                         )
-
                     else:
-
                         send_message(
                             chat_id,
                             "🔒 Активного доступа нет.\n\n"
@@ -236,9 +213,7 @@ def bot_loop():
                             main_menu()
                         )
 
-                # О КУРСЕ
                 elif text == "ℹ️ О курсе":
-
                     send_message(
                         chat_id,
                         "🎓 Updater Academy\n\n"
@@ -252,9 +227,7 @@ def bot_loop():
                         main_menu()
                     )
 
-                # ГЛАВНОЕ МЕНЮ
                 elif text == "⬅️ Главное меню":
-
                     send_message(
                         chat_id,
                         "Главное меню 👇",
@@ -262,7 +235,6 @@ def bot_loop():
                     )
 
                 else:
-
                     send_message(
                         chat_id,
                         "Используйте меню бота 👇",
@@ -270,7 +242,7 @@ def bot_loop():
                     )
 
         except Exception as error:
-            print("Ошибка:", error)
+            print("Ошибка:", error, flush=True)
             time.sleep(3)
 
 
@@ -288,7 +260,6 @@ class HealthHandler(BaseHTTPRequestHandler):
 
 
 def start_server():
-
     port = int(os.getenv("PORT", 10000))
 
     server = HTTPServer(
