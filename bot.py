@@ -36,7 +36,6 @@ def send_message(chat_id, text, keyboard=None):
         timeout=30
     )
 
-
 def get_updates(offset=None):
     params = {
         "timeout": 30,
@@ -45,13 +44,21 @@ def get_updates(offset=None):
     if offset is not None:
         params["offset"] = offset
 
-    response = requests.get(
-        f"{API_URL}/getUpdates",
-        params=params,
-        timeout=35
-    )
+    try:
+        response = requests.get(
+            f"{API_URL}/getUpdates",
+            params=params,
+            timeout=35
+        )
 
-    return response.json()
+        print("Telegram status:", response.status_code)
+        print("Telegram response:", response.text)
+
+        return response.json()
+
+    except Exception as error:
+        print("GET UPDATES ERROR:", error)
+        return {"ok": False}
 
 
 def has_access(chat_id):
