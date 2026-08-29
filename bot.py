@@ -96,17 +96,8 @@ def course_menu():
 
 
 def bot_loop():
+    print("BOT LOOP STARTED", flush=True)
     offset = None
-
-    # Пропускаем старые сообщения после перезапуска
-    try:
-        old_updates = get_updates(offset=-1)
-
-        if old_updates.get("ok") and old_updates.get("result"):
-            offset = old_updates["result"][-1]["update_id"] + 1
-
-    except Exception as error:
-        print("Ошибка очистки старых сообщений:", error)
 
     while True:
         try:
