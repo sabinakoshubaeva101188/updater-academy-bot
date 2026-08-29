@@ -44,17 +44,19 @@ def get_updates(offset=None):
     if offset is not None:
         params["offset"] = offset
 
-    try:
-        response = requests.get(
-            f"{API_URL}/getUpdates",
-            params=params,
-            timeout=35
-        )
+   try:
+    print("CALLING TELEGRAM GETUPDATES", flush=True)
 
-        print("Telegram status:", response.status_code)
-        print("Telegram response:", response.text)
+    response = requests.get(
+        f"{API_URL}/getUpdates",
+        params=params,
+        timeout=35
+    )
 
-        return response.json()
+    print("Telegram status:", response.status_code, flush=True)
+    print("Telegram response:", response.text, flush=True)
+
+    return response.json()
 
     except Exception as error:
         print("GET UPDATES ERROR:", error)
