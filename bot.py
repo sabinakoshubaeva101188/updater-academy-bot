@@ -41,8 +41,17 @@ def get_updates(offset=None):
         "timeout": 30,
     }
 
-    if offset is not None:
-        params["offset"] = offset
+    ...
+
+    try:
+        ...
+
+    except Exception as error:
+        ...
+        
+
+def has_access(chat_id):
+    user = users.get(chat_id)
 
    try:
     print("CALLING TELEGRAM GETUPDATES", flush=True)
