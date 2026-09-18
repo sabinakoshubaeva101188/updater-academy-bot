@@ -2,6 +2,7 @@ import os
 import time
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from pathlib import Path
 
 import requests
 
@@ -14,6 +15,7 @@ if not TOKEN:
 API_URL = f"https://api.telegram.org/bot{TOKEN}"
 
 ACCESS_TIME = 30 * 24 * 60 * 60
+COURSE_MATERIAL_PATH = Path(__file__).parent / "course" / "UA.pptx"
 
 users = {}
 
@@ -32,6 +34,27 @@ def send_message(chat_id, text, keyboard=None):
         json=data,
         timeout=30
     )
+
+
+def send_course_material(chat_id):
+    """Send the course presentation as a protected Telegram document."""
+    with COURSE_MATERIAL_PATH.open("rb") as material:
+        requests.post(
+            f"{API_URL}/sendDocument",
+            data={
+                "chat_id": chat_id,
+                "caption": "📖 Updater Academy — учебный материал курса.",
+                "protect_content": "true",
+            },
+            files={
+                "document": (
+                    COURSE_MATERIAL_PATH.name,
+                    material,
+                    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                )
+            },
+            timeout=30,
+        )
 
 
 def get_updates(offset=None):
@@ -152,9 +175,10 @@ def bot_loop():
                         send_message(
                             chat_id,
                             "📖 Учебные материалы\n\n"
-                            "Здесь будут размещены уроки курса.\n\n"
-                            "🔐 Доступ ограничен сроком 30 дней."
+                            "Отправляю презентацию курса.\n\n"
+                            "🔐 Документ защищён и доступен в течение 30 дней."
                         )
+                        send_course_material(chat_id)
                     else:
                         send_message(
                             chat_id,
