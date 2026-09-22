@@ -110,6 +110,7 @@ def main_menu():
 def course_menu():
     return {
         "keyboard": [
+            [{"text": "📄 Презентация курса"}],
             [{"text": "📖 Материалы"}],
             [{"text": "📅 Мой доступ"}],
             [{"text": "⬅️ Главное меню"}]
@@ -170,7 +171,7 @@ def bot_loop():
                             main_menu()
                         )
 
-                elif text == "📖 Материалы":
+                elif text in ("📄 Презентация курса", "📖 Материалы"):
                     if has_access(chat_id):
                         send_message(
                             chat_id,
